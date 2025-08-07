@@ -1,26 +1,29 @@
-// Vercel Serverless Function for brand data management
-const { kv } = require('@vercel/kv')
+// Vercel Serverless Function for brand data management with Supabase
+const { createClient } = require('@supabase/supabase-js')
 
-const BRANDS_KEY = 'zid-brands'
-const DEFAULT_BRANDS = [
-  { id: 1, name: 'Crush', category: 'Premium Food', startingSales: 60000, monthlyGrowthRate: 15.5, startingMonth: 0 },
-  { id: 2, name: 'Milaf', category: 'Traditional Goods', startingSales: 10000, monthlyGrowthRate: 8.2, startingMonth: 0 },
-  { id: 3, name: 'Bab Sharqi', category: 'Traditional Goods', startingSales: 10000, monthlyGrowthRate: 3.1, startingMonth: 0 },
-  { id: 4, name: 'Nuricle', category: 'Health & Beauty', startingSales: 10000, monthlyGrowthRate: 6.8, startingMonth: 0 },
-  { id: 5, name: 'Reeq Al Nahl', category: 'Premium Food', startingSales: 5000, monthlyGrowthRate: 12.3, startingMonth: 0 },
-  { id: 6, name: 'Leen Dates', category: 'Premium Food', startingSales: 20000, monthlyGrowthRate: 5.5, startingMonth: 0 }
-]
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables')
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 // CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 module.exports = async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      res.setHeader(key, value)
+    })
     return res.status(200).json({ ok: true })
   }
 
@@ -45,25 +48,37 @@ module.exports = async function handler(req, res) {
     }
   } catch (error) {
     console.error('API Error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
+    return res.status(500).json({ error: 'Internal server error', details: error.message })
   }
 }
 
 // Get all brands
 async function getBrands(req, res) {
   try {
-    let brands = await kv.get(BRANDS_KEY)
+    const { data: brands, error } = await supabase
+      .from('brands')
+      .select('*')
+      .order('id', { ascending: true })
     
-    // Initialize with default brands if none exist
-    if (!brands) {
-      brands = DEFAULT_BRANDS
-      await kv.set(BRANDS_KEY, brands)
+    if (error) {
+      console.error('Supabase error:', error)
+      return res.status(500).json({ error: 'Failed to fetch brands', details: error.message })
     }
     
-    return res.status(200).json({ success: true, brands })
+    // Transform data to match frontend expectations
+    const transformedBrands = brands.map(brand => ({
+      id: brand.id,
+      name: brand.name,
+      category: brand.category,
+      startingSales: parseFloat(brand.starting_sales),
+      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
+      startingMonth: brand.starting_month
+    }))
+    
+    return res.status(200).json({ success: true, brands: transformedBrands })
   } catch (error) {
     console.error('Error fetching brands:', error)
-    return res.status(500).json({ error: 'Failed to fetch brands' })
+    return res.status(500).json({ error: 'Failed to fetch brands', details: error.message })
   }
 }
 
@@ -74,27 +89,42 @@ async function createBrand(req, res) {
     
     // Validation
     if (!name || !category || typeof startingSales !== 'number' || typeof monthlyGrowthRate !== 'number') {
-      return res.status(400).json({ error: 'Missing required fields' })
+      return res.status(400).json({ error: 'Missing or invalid required fields' })
     }
     
-    const brands = await kv.get(BRANDS_KEY) || []
+    const { data: brand, error } = await supabase
+      .from('brands')
+      .insert([
+        {
+          name: name.trim(),
+          category: category.trim(),
+          starting_sales: parseFloat(startingSales),
+          monthly_growth_rate: parseFloat(monthlyGrowthRate),
+          starting_month: parseInt(startingMonth) || 0
+        }
+      ])
+      .select()
+      .single()
     
-    const newBrand = {
-      id: Date.now(),
-      name: name.trim(),
-      category: category.trim(),
-      startingSales: parseFloat(startingSales),
-      monthlyGrowthRate: parseFloat(monthlyGrowthRate),
-      startingMonth: parseInt(startingMonth) || 0
+    if (error) {
+      console.error('Supabase error:', error)
+      return res.status(500).json({ error: 'Failed to create brand', details: error.message })
     }
     
-    brands.push(newBrand)
-    await kv.set(BRANDS_KEY, brands)
+    // Transform data to match frontend expectations
+    const transformedBrand = {
+      id: brand.id,
+      name: brand.name,
+      category: brand.category,
+      startingSales: parseFloat(brand.starting_sales),
+      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
+      startingMonth: brand.starting_month
+    }
     
-    return res.status(201).json({ success: true, brand: newBrand })
+    return res.status(201).json({ success: true, brand: transformedBrand })
   } catch (error) {
     console.error('Error creating brand:', error)
-    return res.status(500).json({ error: 'Failed to create brand' })
+    return res.status(500).json({ error: 'Failed to create brand', details: error.message })
   }
 }
 
@@ -108,29 +138,42 @@ async function updateBrand(req, res) {
       return res.status(400).json({ error: 'Brand ID required' })
     }
     
-    const brands = await kv.get(BRANDS_KEY) || []
-    const brandIndex = brands.findIndex(b => b.id === parseInt(id))
+    const updateData = {}
+    if (name !== undefined) updateData.name = name.trim()
+    if (category !== undefined) updateData.category = category.trim()
+    if (startingSales !== undefined) updateData.starting_sales = parseFloat(startingSales)
+    if (monthlyGrowthRate !== undefined) updateData.monthly_growth_rate = parseFloat(monthlyGrowthRate)
+    if (startingMonth !== undefined) updateData.starting_month = parseInt(startingMonth)
     
-    if (brandIndex === -1) {
-      return res.status(404).json({ error: 'Brand not found' })
+    const { data: brand, error } = await supabase
+      .from('brands')
+      .update(updateData)
+      .eq('id', parseInt(id))
+      .select()
+      .single()
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Brand not found' })
+      }
+      console.error('Supabase error:', error)
+      return res.status(500).json({ error: 'Failed to update brand', details: error.message })
     }
     
-    // Update brand
-    brands[brandIndex] = {
-      ...brands[brandIndex],
-      name: name?.trim() || brands[brandIndex].name,
-      category: category?.trim() || brands[brandIndex].category,
-      startingSales: startingSales !== undefined ? parseFloat(startingSales) : brands[brandIndex].startingSales,
-      monthlyGrowthRate: monthlyGrowthRate !== undefined ? parseFloat(monthlyGrowthRate) : brands[brandIndex].monthlyGrowthRate,
-      startingMonth: startingMonth !== undefined ? parseInt(startingMonth) : brands[brandIndex].startingMonth
+    // Transform data to match frontend expectations
+    const transformedBrand = {
+      id: brand.id,
+      name: brand.name,
+      category: brand.category,
+      startingSales: parseFloat(brand.starting_sales),
+      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
+      startingMonth: brand.starting_month
     }
     
-    await kv.set(BRANDS_KEY, brands)
-    
-    return res.status(200).json({ success: true, brand: brands[brandIndex] })
+    return res.status(200).json({ success: true, brand: transformedBrand })
   } catch (error) {
     console.error('Error updating brand:', error)
-    return res.status(500).json({ error: 'Failed to update brand' })
+    return res.status(500).json({ error: 'Failed to update brand', details: error.message })
   }
 }
 
@@ -143,18 +186,19 @@ async function deleteBrand(req, res) {
       return res.status(400).json({ error: 'Brand ID required' })
     }
     
-    const brands = await kv.get(BRANDS_KEY) || []
-    const filteredBrands = brands.filter(b => b.id !== parseInt(id))
+    const { error } = await supabase
+      .from('brands')
+      .delete()
+      .eq('id', parseInt(id))
     
-    if (filteredBrands.length === brands.length) {
-      return res.status(404).json({ error: 'Brand not found' })
+    if (error) {
+      console.error('Supabase error:', error)
+      return res.status(500).json({ error: 'Failed to delete brand', details: error.message })
     }
-    
-    await kv.set(BRANDS_KEY, filteredBrands)
     
     return res.status(200).json({ success: true })
   } catch (error) {
     console.error('Error deleting brand:', error)
-    return res.status(500).json({ error: 'Failed to delete brand' })
+    return res.status(500).json({ error: 'Failed to delete brand', details: error.message })
   }
 }

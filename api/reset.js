@@ -1,25 +1,37 @@
-// Reset brands to default data
-const { kv } = require('@vercel/kv')
+// Reset brands to default data using Supabase
+const { createClient } = require('@supabase/supabase-js')
 
-const BRANDS_KEY = 'zid-brands'
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase environment variables')
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 const DEFAULT_BRANDS = [
-  { id: 1, name: 'Crush', category: 'Premium Food', startingSales: 60000, monthlyGrowthRate: 15.5, startingMonth: 0 },
-  { id: 2, name: 'Milaf', category: 'Traditional Goods', startingSales: 10000, monthlyGrowthRate: 8.2, startingMonth: 0 },
-  { id: 3, name: 'Bab Sharqi', category: 'Traditional Goods', startingSales: 10000, monthlyGrowthRate: 3.1, startingMonth: 0 },
-  { id: 4, name: 'Nuricle', category: 'Health & Beauty', startingSales: 10000, monthlyGrowthRate: 6.8, startingMonth: 0 },
-  { id: 5, name: 'Reeq Al Nahl', category: 'Premium Food', startingSales: 5000, monthlyGrowthRate: 12.3, startingMonth: 0 },
-  { id: 6, name: 'Leen Dates', category: 'Premium Food', startingSales: 20000, monthlyGrowthRate: 5.5, startingMonth: 0 }
+  { name: 'Crush', category: 'Premium Food', starting_sales: 60000.00, monthly_growth_rate: 15.50, starting_month: 0 },
+  { name: 'Milaf', category: 'Traditional Goods', starting_sales: 10000.00, monthly_growth_rate: 8.20, starting_month: 0 },
+  { name: 'Bab Sharqi', category: 'Traditional Goods', starting_sales: 10000.00, monthly_growth_rate: 3.10, starting_month: 0 },
+  { name: 'Nuricle', category: 'Health & Beauty', starting_sales: 10000.00, monthly_growth_rate: 6.80, starting_month: 0 },
+  { name: 'Reeq Al Nahl', category: 'Premium Food', starting_sales: 5000.00, monthly_growth_rate: 12.30, starting_month: 0 },
+  { name: 'Leen Dates', category: 'Premium Food', starting_sales: 20000.00, monthly_growth_rate: 5.50, starting_month: 0 }
 ]
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
 module.exports = async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      res.setHeader(key, value)
+    })
     return res.status(200).json({ ok: true })
   }
 
@@ -34,10 +46,41 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    await kv.set(BRANDS_KEY, DEFAULT_BRANDS)
-    return res.status(200).json({ success: true, brands: DEFAULT_BRANDS })
+    // Delete all existing brands
+    const { error: deleteError } = await supabase
+      .from('brands')
+      .delete()
+      .neq('id', 0) // Delete all records (id is never 0)
+
+    if (deleteError) {
+      console.error('Error deleting brands:', deleteError)
+      return res.status(500).json({ error: 'Failed to reset brands', details: deleteError.message })
+    }
+
+    // Insert default brands
+    const { data: brands, error: insertError } = await supabase
+      .from('brands')
+      .insert(DEFAULT_BRANDS)
+      .select()
+
+    if (insertError) {
+      console.error('Error inserting default brands:', insertError)
+      return res.status(500).json({ error: 'Failed to reset brands', details: insertError.message })
+    }
+
+    // Transform data to match frontend expectations
+    const transformedBrands = brands.map(brand => ({
+      id: brand.id,
+      name: brand.name,
+      category: brand.category,
+      startingSales: parseFloat(brand.starting_sales),
+      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
+      startingMonth: brand.starting_month
+    }))
+
+    return res.status(200).json({ success: true, brands: transformedBrands })
   } catch (error) {
     console.error('Error resetting brands:', error)
-    return res.status(500).json({ error: 'Failed to reset brands' })
+    return res.status(500).json({ error: 'Failed to reset brands', details: error.message })
   }
 }
