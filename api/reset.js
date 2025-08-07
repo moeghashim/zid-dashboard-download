@@ -1,5 +1,5 @@
 // Reset brands to default data
-import { kv } from '@vercel/kv'
+const { kv } = require('@vercel/kv')
 
 const BRANDS_KEY = 'zid-brands'
 const DEFAULT_BRANDS = [
@@ -17,7 +17,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ ok: true })

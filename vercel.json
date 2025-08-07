@@ -1,12 +1,4 @@
 {
-  "functions": {
-    "api/brands.js": {
-      "runtime": "@vercel/node"
-    },
-    "api/reset.js": {
-      "runtime": "@vercel/node"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
