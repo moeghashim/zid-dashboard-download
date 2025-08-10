@@ -13,14 +13,16 @@ if (supabaseUrl && supabaseKey) {
 }
 
 // Default brands data for development when Supabase is not configured
-const defaultBrands = [
+let defaultBrands = [
   {
     id: 1,
     name: "Tech Innovators",
     category: "Technology",
     startingSales: 45000,
     monthlyGrowthRate: 12,
-    startingMonth: 0
+    startingMonth: 0,
+    hasLaunchPlan: true,
+    launchPlanFee: 15000
   },
   {
     id: 2,
@@ -28,7 +30,9 @@ const defaultBrands = [
     category: "Fashion",
     startingSales: 32000,
     monthlyGrowthRate: 8,
-    startingMonth: 2
+    startingMonth: 2,
+    hasLaunchPlan: true,
+    launchPlanFee: 8000
   },
   {
     id: 3,
@@ -36,7 +40,9 @@ const defaultBrands = [
     category: "Health",
     startingSales: 28000,
     monthlyGrowthRate: 15,
-    startingMonth: 1
+    startingMonth: 1,
+    hasLaunchPlan: false,
+    launchPlanFee: 0
   }
 ]
 
@@ -107,7 +113,9 @@ async function getBrands(req, res) {
       category: brand.category,
       startingSales: parseFloat(brand.starting_sales),
       monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
-      startingMonth: brand.starting_month
+      startingMonth: brand.starting_month,
+      hasLaunchPlan: brand.has_launch_plan || false,
+      launchPlanFee: parseFloat(brand.launch_plan_fee) || 0
     }))
     
     return res.status(200).json({ success: true, brands: transformedBrands })
@@ -121,11 +129,31 @@ async function getBrands(req, res) {
 // Create new brand
 async function createBrand(req, res) {
   try {
-    const { name, category, startingSales, monthlyGrowthRate, startingMonth } = req.body
+    const { name, category, startingSales, monthlyGrowthRate, startingMonth, hasLaunchPlan, launchPlanFee } = req.body
     
     // Validation
-    if (!name || !category || typeof startingSales !== 'number' || typeof monthlyGrowthRate !== 'number') {
+    if (!name || !category || startingSales === undefined || monthlyGrowthRate === undefined) {
       return res.status(400).json({ error: 'Missing or invalid required fields' })
+    }
+
+    // Use default data if Supabase is not configured
+    if (!supabase) {
+      const newBrand = {
+        id: Date.now(), // Simple ID generation for development
+        name: name.trim(),
+        category: category.trim(),
+        startingSales: parseFloat(startingSales),
+        monthlyGrowthRate: parseFloat(monthlyGrowthRate),
+        startingMonth: parseInt(startingMonth) || 0,
+        hasLaunchPlan: hasLaunchPlan || false,
+        launchPlanFee: parseFloat(launchPlanFee) || 0
+      }
+      
+      // Add to in-memory array
+      defaultBrands.push(newBrand)
+      console.log('Added brand:', newBrand)
+      
+      return res.status(201).json({ success: true, brand: newBrand })
     }
     
     const { data: brand, error } = await supabase
@@ -136,7 +164,9 @@ async function createBrand(req, res) {
           category: category.trim(),
           starting_sales: parseFloat(startingSales),
           monthly_growth_rate: parseFloat(monthlyGrowthRate),
-          starting_month: parseInt(startingMonth) || 0
+          starting_month: parseInt(startingMonth) || 0,
+          has_launch_plan: hasLaunchPlan || false,
+          launch_plan_fee: parseFloat(launchPlanFee) || 0
         }
       ])
       .select()
@@ -154,7 +184,9 @@ async function createBrand(req, res) {
       category: brand.category,
       startingSales: parseFloat(brand.starting_sales),
       monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
-      startingMonth: brand.starting_month
+      startingMonth: brand.starting_month,
+      hasLaunchPlan: brand.has_launch_plan || false,
+      launchPlanFee: parseFloat(brand.launch_plan_fee) || 0
     }
     
     return res.status(201).json({ success: true, brand: transformedBrand })
@@ -168,10 +200,36 @@ async function createBrand(req, res) {
 async function updateBrand(req, res) {
   try {
     const { id } = req.query
-    const { name, category, startingSales, monthlyGrowthRate, startingMonth } = req.body
+    const { name, category, startingSales, monthlyGrowthRate, startingMonth, hasLaunchPlan, launchPlanFee } = req.body
     
     if (!id) {
       return res.status(400).json({ error: 'Brand ID required' })
+    }
+
+    // Use default data if Supabase is not configured
+    if (!supabase) {
+      const brandIndex = defaultBrands.findIndex(b => b.id === parseInt(id))
+      if (brandIndex === -1) {
+        return res.status(404).json({ error: 'Brand not found' })
+      }
+      
+      const existingBrand = defaultBrands[brandIndex]
+      const updatedBrand = {
+        ...existingBrand,
+        name: name !== undefined ? name.trim() : existingBrand.name,
+        category: category !== undefined ? category.trim() : existingBrand.category,
+        startingSales: startingSales !== undefined ? parseFloat(startingSales) : existingBrand.startingSales,
+        monthlyGrowthRate: monthlyGrowthRate !== undefined ? parseFloat(monthlyGrowthRate) : existingBrand.monthlyGrowthRate,
+        startingMonth: startingMonth !== undefined ? parseInt(startingMonth) : existingBrand.startingMonth,
+        hasLaunchPlan: hasLaunchPlan !== undefined ? hasLaunchPlan : existingBrand.hasLaunchPlan,
+        launchPlanFee: launchPlanFee !== undefined ? parseFloat(launchPlanFee) : existingBrand.launchPlanFee
+      }
+      
+      // Update in-memory array
+      defaultBrands[brandIndex] = updatedBrand
+      console.log('Updated brand:', updatedBrand)
+      
+      return res.status(200).json({ success: true, brand: updatedBrand })
     }
     
     const updateData = {}
@@ -180,6 +238,8 @@ async function updateBrand(req, res) {
     if (startingSales !== undefined) updateData.starting_sales = parseFloat(startingSales)
     if (monthlyGrowthRate !== undefined) updateData.monthly_growth_rate = parseFloat(monthlyGrowthRate)
     if (startingMonth !== undefined) updateData.starting_month = parseInt(startingMonth)
+    if (hasLaunchPlan !== undefined) updateData.has_launch_plan = hasLaunchPlan
+    if (launchPlanFee !== undefined) updateData.launch_plan_fee = parseFloat(launchPlanFee)
     
     const { data: brand, error } = await supabase
       .from('brands')
@@ -203,7 +263,9 @@ async function updateBrand(req, res) {
       category: brand.category,
       startingSales: parseFloat(brand.starting_sales),
       monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
-      startingMonth: brand.starting_month
+      startingMonth: brand.starting_month,
+      hasLaunchPlan: brand.has_launch_plan || false,
+      launchPlanFee: parseFloat(brand.launch_plan_fee) || 0
     }
     
     return res.status(200).json({ success: true, brand: transformedBrand })
@@ -220,6 +282,20 @@ async function deleteBrand(req, res) {
     
     if (!id) {
       return res.status(400).json({ error: 'Brand ID required' })
+    }
+
+    // Use default data if Supabase is not configured
+    if (!supabase) {
+      const brandIndex = defaultBrands.findIndex(b => b.id === parseInt(id))
+      if (brandIndex === -1) {
+        return res.status(404).json({ error: 'Brand not found' })
+      }
+      
+      // Remove from in-memory array
+      const deletedBrand = defaultBrands.splice(brandIndex, 1)[0]
+      console.log('Deleted brand:', deletedBrand)
+      
+      return res.status(200).json({ success: true })
     }
     
     const { error } = await supabase

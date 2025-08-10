@@ -4,9 +4,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Edit, Trash2, DollarSign, TrendingUp, Calendar, Package, RefreshCw, Cloud, CloudOff, Loader2, Download, Upload } from 'lucide-react'
+import { 
+  LineChart, Line, AreaChart, Area, BarChart, Bar, 
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
+} from 'recharts'
 import { useAuth } from '../contexts/AuthContext'
 import { useApi } from '../contexts/ApiContext'
 import { calculateBrandPerformance, calculateAggregatedData, calculateKeyMetrics, formatCurrency, MONTHS } from '../utils/revenueCalculations'
@@ -34,7 +39,9 @@ export default function EnhancedBrandPerformance() {
     category: '',
     startingSales: '',
     monthlyGrowthRate: '',
-    startingMonth: 0
+    startingMonth: 0,
+    hasLaunchPlan: false,
+    launchPlanFee: ''
   })
   const [formErrors, setFormErrors] = useState({})
   const [activeTab, setActiveTab] = useState('overview')
@@ -49,7 +56,9 @@ export default function EnhancedBrandPerformance() {
       category: '',
       startingSales: '',
       monthlyGrowthRate: '',
-      startingMonth: 0
+      startingMonth: 0,
+      hasLaunchPlan: false,
+      launchPlanFee: ''
     })
     setFormErrors({})
     setShowAddForm(false)
@@ -92,7 +101,9 @@ export default function EnhancedBrandPerformance() {
         category: formData.category.trim(),
         startingSales: parseFloat(formData.startingSales),
         monthlyGrowthRate: parseFloat(formData.monthlyGrowthRate),
-        startingMonth: parseInt(formData.startingMonth)
+        startingMonth: parseInt(formData.startingMonth),
+        hasLaunchPlan: formData.hasLaunchPlan,
+        launchPlanFee: formData.hasLaunchPlan ? parseFloat(formData.launchPlanFee) || 0 : 0
       }
       
       if (editingBrand) {
@@ -114,7 +125,9 @@ export default function EnhancedBrandPerformance() {
       category: brand.category,
       startingSales: brand.startingSales.toString(),
       monthlyGrowthRate: brand.monthlyGrowthRate.toString(),
-      startingMonth: brand.startingMonth || 0
+      startingMonth: brand.startingMonth || 0,
+      hasLaunchPlan: brand.hasLaunchPlan || false,
+      launchPlanFee: brand.launchPlanFee ? brand.launchPlanFee.toString() : ''
     })
     setEditingBrand(brand)
     setShowAddForm(true)
@@ -278,6 +291,66 @@ export default function EnhancedBrandPerformance() {
         </Card>
       </div>
 
+      {/* Brand Performance Chart */}
+      {brands.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Brand Performance Overview</CardTitle>
+            <CardDescription>
+              Monthly revenue projection for each brand over the 12-month period
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={(() => {
+                // Create combined data for all brands
+                const combinedData = MONTHS.map((month, monthIndex) => {
+                  const dataPoint = { month }
+                  brands.forEach(brand => {
+                    const brandPerformance = calculateBrandPerformance(brand)
+                    dataPoint[brand.name] = brandPerformance[monthIndex]?.revenue || 0
+                  })
+                  return dataPoint
+                })
+                return combinedData
+              })()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="month" 
+                  tick={{ fontSize: 12 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis 
+                  tick={{ fontSize: 12 }}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                />
+                <Tooltip 
+                  formatter={(value, name) => [formatCurrency(value), name]}
+                  labelStyle={{ color: '#000' }}
+                />
+                <Legend />
+                {brands.map((brand, index) => {
+                  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                  return (
+                    <Line 
+                      key={brand.id}
+                      type="monotone" 
+                      dataKey={brand.name} 
+                      stroke={colors[index % colors.length]} 
+                      strokeWidth={2}
+                      dot={{ fill: colors[index % colors.length], strokeWidth: 2, r: 4 }}
+                      connectNulls={false}
+                    />
+                  )
+                })}
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Add/Edit Brand Form */}
       {showAddForm && isAdmin() && (
         <Card>
@@ -370,6 +443,38 @@ export default function EnhancedBrandPerformance() {
                     The month when this brand starts generating revenue
                   </p>
                 </div>
+
+                {/* Launch Plan Section */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="space-y-1">
+                      <Label htmlFor="hasLaunchPlan">Launch Plan</Label>
+                      <p className="text-sm text-muted-foreground">One-time setup fee (30% to Zid)</p>
+                    </div>
+                    <Switch
+                      id="hasLaunchPlan"
+                      checked={formData.hasLaunchPlan}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hasLaunchPlan: checked }))}
+                    />
+                  </div>
+                </div>
+
+                {formData.hasLaunchPlan && (
+                  <div className="md:col-span-2">
+                    <Label htmlFor="launchPlanFee">Launch Plan Fee ($)</Label>
+                    <Input
+                      id="launchPlanFee"
+                      type="number"
+                      value={formData.launchPlanFee}
+                      onChange={(e) => setFormData(prev => ({ ...prev, launchPlanFee: e.target.value }))}
+                      placeholder="e.g., 10000"
+                      className={formErrors.launchPlanFee ? 'border-red-500' : ''}
+                    />
+                    {formErrors.launchPlanFee && (
+                      <p className="text-sm text-red-500 mt-1">{formErrors.launchPlanFee}</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {formErrors.submit && (

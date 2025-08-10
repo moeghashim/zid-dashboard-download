@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import { 
   TrendingUp, TrendingDown, DollarSign, Calendar, Target, 
-  BarChart3, PieChart as PieChartIcon, Activity, AlertTriangle, Percent 
+  BarChart3, PieChart as PieChartIcon, Activity, Percent 
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useApi } from '../contexts/ApiContext'
@@ -58,8 +58,10 @@ export default function Dashboard() {
 
 
   // Commission calculations with safety checks
-  const totalCommission = (keyMetrics.totalRevenue * commissionRate) / 100
-  const avgMonthlyCommission = totalCommission / 12
+  const recurringCommission = (keyMetrics.totalRecurringRevenue * commissionRate) / 100
+  const launchPlanCommission = keyMetrics.zidLaunchPlanCommission || 0
+  const totalCommission = recurringCommission + launchPlanCommission
+  const avgMonthlyCommission = recurringCommission / 12
   
   const peakCommissionMonth = projectionData.length > 0 
     ? projectionData.reduce((max, month) => 
@@ -79,7 +81,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -113,14 +115,26 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Volatility</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Launch Plans</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatPercentage(keyMetrics.volatility)}</div>
-            <p className="text-xs text-muted-foreground">Revenue volatility</p>
+            <div className="text-2xl font-bold">{formatCurrency(keyMetrics.totalLaunchPlanRevenue)}</div>
+            <p className="text-xs text-muted-foreground">{keyMetrics.brandsWithLaunchPlans} brands</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Zid's Share</CardTitle>
+            <Percent className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(totalCommission)}</div>
+            <p className="text-xs text-muted-foreground">Total commission</p>
           </CardContent>
         </Card>
       </div>
@@ -239,16 +253,6 @@ export default function Dashboard() {
                     <h4 className="font-semibold">Strong Q1 2026 Performance</h4>
                     <p className="text-sm text-muted-foreground">
                       Q1 2026 shows exceptional growth with {quarterlyData[1]?.growth}% quarter-over-quarter increase
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold">High Revenue Volatility</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Revenue shows significant month-over-month fluctuations requiring careful monitoring
                     </p>
                   </div>
                 </div>
@@ -526,12 +530,12 @@ export default function Dashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Peak Commission Month</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Launch Commission</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(peakCommission)}</div>
-                <p className="text-xs text-muted-foreground">{peakCommissionMonth.month}</p>
+                <div className="text-2xl font-bold">{formatCurrency(launchPlanCommission)}</div>
+                <p className="text-xs text-muted-foreground">30% of launch plans</p>
               </CardContent>
             </Card>
 

@@ -7,31 +7,41 @@ export const MONTHS = [
 
 /**
  * Calculate monthly performance for a single brand with starting month support
- * @param {Object} brand - Brand object with startingSales, monthlyGrowthRate, and startingMonth
+ * @param {Object} brand - Brand object with startingSales, monthlyGrowthRate, startingMonth, hasLaunchPlan, launchPlanFee
  * @returns {Array} Array of monthly performance data
  */
 export function calculateBrandPerformance(brand) {
-  const { startingSales, monthlyGrowthRate, startingMonth = 0 } = brand
+  const { startingSales, monthlyGrowthRate, startingMonth = 0, hasLaunchPlan = false, launchPlanFee = 0 } = brand
   const growthRate = monthlyGrowthRate / 100
   
   return MONTHS.map((month, index) => {
     let revenue = 0
+    let launchPlanRevenue = 0
     
     // Only calculate revenue if we've reached the starting month
     if (index >= startingMonth) {
       // Calculate months since starting month
       const monthsSinceStart = index - startingMonth
       revenue = startingSales * Math.pow(1 + growthRate, monthsSinceStart)
+      
+      // Add launch plan fee only in the starting month (one-time fee)
+      if (hasLaunchPlan && index === startingMonth) {
+        launchPlanRevenue = launchPlanFee || 0
+      }
     }
+    
+    const totalRevenue = revenue + launchPlanRevenue
     
     return {
       month,
-      revenue,
+      revenue: totalRevenue, // Total revenue including launch plan
+      recurringRevenue: revenue, // Just the recurring revenue
+      launchPlanRevenue, // Launch plan revenue for this month
       monthIndex: index,
       isActive: index >= startingMonth,
       brand: brand.name,
       category: brand.category,
-      sales: Math.round(revenue) // For backward compatibility
+      sales: Math.round(totalRevenue) // For backward compatibility
     }
   })
 }
@@ -76,7 +86,37 @@ export function calculateAggregatedData(brands) {
 }
 
 /**
- * Calculate key metrics from brands data
+ * Calculate launch plan metrics from brands data
+ * @param {Array} brands - Array of brand objects
+ * @returns {Object} Launch plan metrics object
+ */
+export function calculateLaunchPlanMetrics(brands) {
+  if (!brands || brands.length === 0) {
+    return {
+      totalLaunchPlanRevenue: 0,
+      zidLaunchPlanCommission: 0,
+      launchPlanCommissionRate: 30,
+      brandsWithLaunchPlans: 0
+    }
+  }
+
+  const totalLaunchPlanRevenue = brands.reduce((sum, brand) => {
+    return sum + (brand.hasLaunchPlan ? (brand.launchPlanFee || 0) : 0)
+  }, 0)
+
+  const zidLaunchPlanCommission = totalLaunchPlanRevenue * 0.30 // 30% commission
+  const brandsWithLaunchPlans = brands.filter(brand => brand.hasLaunchPlan).length
+
+  return {
+    totalLaunchPlanRevenue,
+    zidLaunchPlanCommission,
+    launchPlanCommissionRate: 30,
+    brandsWithLaunchPlans
+  }
+}
+
+/**
+ * Calculate key metrics from brands data including launch plans
  * @param {Array} brands - Array of brand objects
  * @returns {Object} Key metrics object
  */
@@ -84,13 +124,15 @@ export function calculateKeyMetrics(brands) {
   if (!brands || brands.length === 0) {
     return {
       totalRevenue: 0,
+      totalRecurringRevenue: 0,
+      totalLaunchPlanRevenue: 0,
+      zidLaunchPlanCommission: 0,
       averageMonthlyRevenue: 0,
       avgMonthlyRevenue: 0, // For backward compatibility
       peakMonthRevenue: 0,
       peakMonth: 'N/A',
       peakRevenue: 0, // For backward compatibility
-      volatility: 0,
-      monthlyVolatility: 0 // For backward compatibility
+      brandsWithLaunchPlans: 0
     }
   }
   
@@ -99,28 +141,29 @@ export function calculateKeyMetrics(brands) {
   const totalRevenue = revenues.reduce((sum, revenue) => sum + revenue, 0)
   const averageMonthlyRevenue = totalRevenue / revenues.length
   
+  // Calculate launch plan metrics
+  const launchPlanMetrics = calculateLaunchPlanMetrics(brands)
+  
+  // Calculate total recurring revenue (without launch plan fees)
+  const totalRecurringRevenue = totalRevenue - launchPlanMetrics.totalLaunchPlanRevenue
+  
   // Find peak month
   const maxRevenue = Math.max(...revenues)
   const peakMonthIndex = revenues.indexOf(maxRevenue)
   const peakMonth = monthlyTotals[peakMonthIndex]?.month || 'N/A'
   
-  // Calculate volatility (coefficient of variation)
-  const variance = revenues.reduce((sum, revenue) => {
-    return sum + Math.pow(revenue - averageMonthlyRevenue, 2)
-  }, 0) / revenues.length
-  
-  const standardDeviation = Math.sqrt(variance)
-  const volatility = averageMonthlyRevenue > 0 ? (standardDeviation / averageMonthlyRevenue) * 100 : 0
   
   return {
     totalRevenue,
+    totalRecurringRevenue,
+    totalLaunchPlanRevenue: launchPlanMetrics.totalLaunchPlanRevenue,
+    zidLaunchPlanCommission: launchPlanMetrics.zidLaunchPlanCommission,
     averageMonthlyRevenue,
     avgMonthlyRevenue: averageMonthlyRevenue, // For backward compatibility
     peakMonthRevenue: maxRevenue,
     peakMonth,
     peakRevenue: maxRevenue, // For backward compatibility
-    volatility,
-    monthlyVolatility: volatility / 100 // For backward compatibility (as decimal)
+    brandsWithLaunchPlans: launchPlanMetrics.brandsWithLaunchPlans
   }
 }
 

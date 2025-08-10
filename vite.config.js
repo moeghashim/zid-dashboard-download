@@ -12,6 +12,34 @@ function devAPIPlugin() {
         console.log('API Request:', req.method, req.url)
         if (req.url.startsWith('/brands')) {
           try {
+            // Parse URL and query parameters
+            const url = new URL(req.url, 'http://localhost')
+            const query = Object.fromEntries(url.searchParams.entries())
+            
+            // Parse request body for POST/PUT requests
+            let body = {}
+            if (req.method === 'POST' || req.method === 'PUT') {
+              const chunks = []
+              for await (const chunk of req) {
+                chunks.push(chunk)
+              }
+              const bodyText = Buffer.concat(chunks).toString()
+              if (bodyText) {
+                try {
+                  body = JSON.parse(bodyText)
+                } catch (e) {
+                  console.error('Failed to parse JSON body:', e)
+                }
+              }
+            }
+
+            // Create enhanced request object
+            const mockReq = {
+              ...req,
+              query,
+              body
+            }
+
             // Create Vercel-compatible response object
             const mockRes = {
               status: (code) => ({
@@ -28,7 +56,7 @@ function devAPIPlugin() {
 
             // Import the API handler dynamically
             const { default: handler } = await import('./api/brands.js')
-            await handler(req, mockRes)
+            await handler(mockReq, mockRes)
           } catch (error) {
             console.error('API Error:', error)
             res.writeHead(500, { 'Content-Type': 'application/json' })

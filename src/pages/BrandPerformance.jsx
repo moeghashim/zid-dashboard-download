@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Label } from '@/components/ui/label.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
+import { Switch } from '@/components/ui/switch.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
 import { 
   LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -25,7 +26,7 @@ import {
 
 export default function BrandPerformance() {
   const [editingBrand, setEditingBrand] = useState(null)
-  const [newBrand, setNewBrand] = useState({ name: '', category: '', startingSales: '', monthlyGrowthRate: '' })
+  const [newBrand, setNewBrand] = useState({ name: '', category: '', startingSales: '', monthlyGrowthRate: '', hasLaunchPlan: false, launchPlanFee: '' })
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedTab, setSelectedTab] = useState('overview')
   const { isAdmin } = useAuth()
@@ -61,7 +62,7 @@ export default function BrandPerformance() {
   const handleAddBrand = () => {
     if (newBrand.name && newBrand.category && newBrand.startingSales && newBrand.monthlyGrowthRate) {
       addBrand(newBrand)
-      setNewBrand({ name: '', category: '', startingSales: '', monthlyGrowthRate: '' })
+      setNewBrand({ name: '', category: '', startingSales: '', monthlyGrowthRate: '', hasLaunchPlan: false, launchPlanFee: '' })
       setShowAddForm(false)
     }
   }
@@ -179,6 +180,7 @@ export default function BrandPerformance() {
       </div>
 
       {/* Add Brand Form */}
+      {console.log('showAddForm:', showAddForm, 'isAdmin:', isAdmin())}
       {showAddForm && (
         <Card>
           <CardHeader>
@@ -231,6 +233,32 @@ export default function BrandPerformance() {
                 />
               </div>
             </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-1">
+                <Label htmlFor="newBrandLaunchPlan">Launch Plan</Label>
+                <p className="text-sm text-muted-foreground">One-time setup fee (30% to Zid)</p>
+              </div>
+              <Switch
+                id="newBrandLaunchPlan"
+                checked={newBrand.hasLaunchPlan}
+                onCheckedChange={(checked) => {
+                  console.log('Launch plan toggle:', checked)
+                  setNewBrand({ ...newBrand, hasLaunchPlan: checked })
+                }}
+              />
+            </div>
+            {newBrand.hasLaunchPlan && (
+              <div>
+                <Label htmlFor="newBrandLaunchPlanFee">Launch Plan Fee ($)</Label>
+                <Input
+                  id="newBrandLaunchPlanFee"
+                  type="number"
+                  value={newBrand.launchPlanFee}
+                  onChange={(e) => setNewBrand({ ...newBrand, launchPlanFee: e.target.value })}
+                  placeholder="e.g., 10000"
+                />
+              </div>
+            )}
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowAddForm(false)}>
                 Cancel
@@ -263,6 +291,7 @@ export default function BrandPerformance() {
                   <th className="text-left p-2 font-medium">Category</th>
                   <th className="text-right p-2 font-medium">Starting Sales</th>
                   <th className="text-right p-2 font-medium">Growth Rate</th>
+                  <th className="text-center p-2 font-medium">Launch Plan</th>
                   <th className="text-right p-2 font-medium">12M Revenue</th>
                   {isAdmin() && <th className="text-center p-2 font-medium">Actions</th>}
                 </tr>
@@ -290,6 +319,17 @@ export default function BrandPerformance() {
                           <Percent className="h-3 w-3" />
                           {brand.monthlyGrowthRate.toFixed(1)}%
                         </span>
+                      </td>
+                      <td className="text-center p-2">
+                        {brand.hasLaunchPlan ? (
+                          <div className="space-y-1">
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              {formatCurrency(brand.launchPlanFee)}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="text-right p-2 font-mono font-bold">{formatCurrency(totalRevenue)}</td>
                       {isAdmin() && (
@@ -378,6 +418,29 @@ export default function BrandPerformance() {
                 />
               </div>
             </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-1">
+                <Label htmlFor="editBrandLaunchPlan">Launch Plan</Label>
+                <p className="text-sm text-muted-foreground">One-time setup fee (30% to Zid)</p>
+              </div>
+              <Switch
+                id="editBrandLaunchPlan"
+                checked={editingBrand.hasLaunchPlan || false}
+                onCheckedChange={(checked) => setEditingBrand({ ...editingBrand, hasLaunchPlan: checked })}
+              />
+            </div>
+            {(editingBrand.hasLaunchPlan || false) && (
+              <div>
+                <Label htmlFor="editBrandLaunchPlanFee">Launch Plan Fee ($)</Label>
+                <Input
+                  id="editBrandLaunchPlanFee"
+                  type="number"
+                  value={editingBrand.launchPlanFee || ''}
+                  onChange={(e) => setEditingBrand({ ...editingBrand, launchPlanFee: parseFloat(e.target.value) })}
+                  placeholder="e.g., 10000"
+                />
+              </div>
+            )}
             <div className="flex justify-end gap-2 mt-6">
               <Button variant="outline" onClick={() => setEditingBrand(null)}>
                 Cancel
