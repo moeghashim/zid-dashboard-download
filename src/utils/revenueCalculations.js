@@ -130,7 +130,17 @@ export function calculateKeyMetrics(brands) {
  * @returns {Array} Chart-compatible data
  */
 export function convertToProjectionData(brands) {
-  const { monthlyTotals } = calculateAggregatedData(brands)
+  if (!brands || brands.length === 0) {
+    return []
+  }
+  
+  const aggregatedResult = calculateAggregatedData(brands)
+  const monthlyTotals = aggregatedResult.monthlyTotals || aggregatedResult
+  
+  if (!Array.isArray(monthlyTotals)) {
+    console.error('monthlyTotals is not an array:', monthlyTotals)
+    return []
+  }
   
   return monthlyTotals.map((data, index) => {
     // Calculate month-over-month growth

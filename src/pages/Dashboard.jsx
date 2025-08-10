@@ -57,12 +57,16 @@ export default function Dashboard() {
   }
 
 
-  // Commission calculations
+  // Commission calculations with safety checks
   const totalCommission = (keyMetrics.totalRevenue * commissionRate) / 100
   const avgMonthlyCommission = totalCommission / 12
-  const peakCommissionMonth = projectionData.reduce((max, month) => 
-    month.revenue > max.revenue ? month : max
-  )
+  
+  const peakCommissionMonth = projectionData.length > 0 
+    ? projectionData.reduce((max, month) => 
+        month.revenue > max.revenue ? month : max
+      )
+    : { revenue: 0 }
+  
   const peakCommission = (peakCommissionMonth.revenue * commissionRate) / 100
 
   const commissionData = projectionData.map(month => ({
