@@ -51,13 +51,13 @@ vercel env add SUPABASE_URL
 # Enter: https://oqvprhxtvyjosdxalnxw.supabase.co
 
 vercel env add SUPABASE_SERVICE_ROLE_KEY
-# Enter: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xdnByaHh0dnlqb3NkeGFsbnh3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDUzOTI5MCwiZXhwIjoyMDcwMTE1MjkwfQ.9Exg87M4p_f7HVuA6XkxqBf7kcH_Nk4nEdJ4PTHR2tM
+# Enter: YOUR_SUPABASE_SERVICE_ROLE_KEY_HERE
 
 vercel env add NEXT_PUBLIC_SUPABASE_URL  
 # Enter: https://oqvprhxtvyjosdxalnxw.supabase.co
 
 vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
-# Enter: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xdnByaHh0dnlqb3NkeGFsbnh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ1MzkyOTAsImV4cCI6MjA3MDExNTI5MH0.uVhhuZr0PN4ZnJZ5ChK8RfKO4QXA2-oH4aJlgwtX8GQ
+# Enter: YOUR_SUPABASE_ANON_KEY_HERE
 ```
 
 ## Step 3: Deploy with Environment Variables
