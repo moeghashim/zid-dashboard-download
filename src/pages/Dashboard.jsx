@@ -106,12 +106,12 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Peak Month</CardTitle>
+            <CardTitle className="text-sm font-medium">12th Mo Commission</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(keyMetrics.peakRevenue)}</div>
-            <p className="text-xs text-muted-foreground">{keyMetrics.peakMonth}</p>
+            <div className="text-2xl font-bold">{formatCurrency(keyMetrics.twelfthMonthCommission || 0)}</div>
+            <p className="text-xs text-muted-foreground">Sep 2026 (Final Month)</p>
           </CardContent>
         </Card>
 
@@ -260,9 +260,9 @@ export default function Dashboard() {
                 <div className="flex items-start gap-3">
                   <Target className="h-5 w-5 text-blue-500 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold">Peak Performance</h4>
+                    <h4 className="font-semibold">12th Month Commission</h4>
                     <p className="text-sm text-muted-foreground">
-                      {keyMetrics.peakMonth} represents the highest single-month revenue at {formatCurrency(keyMetrics.peakRevenue)}
+                      Zid earns {formatCurrency(keyMetrics.twelfthMonthCommission || 0)} commission in Sep 2026 (final month)
                     </p>
                   </div>
                 </div>
