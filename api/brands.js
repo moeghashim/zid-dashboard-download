@@ -280,12 +280,17 @@ async function deleteBrand(req, res) {
   try {
     const { id } = req.query
     
+    console.log('Delete request received for ID:', id)
+    console.log('Request method:', req.method)
+    console.log('Supabase client status:', !!supabase)
+    
     if (!id) {
       return res.status(400).json({ error: 'Brand ID required' })
     }
 
     // Use default data if Supabase is not configured
     if (!supabase) {
+      console.log('Using fallback mode - Supabase not configured')
       const brandIndex = defaultBrands.findIndex(b => b.id === parseInt(id))
       if (brandIndex === -1) {
         return res.status(404).json({ error: 'Brand not found' })
@@ -298,16 +303,21 @@ async function deleteBrand(req, res) {
       return res.status(200).json({ success: true })
     }
     
-    const { error } = await supabase
+    console.log('Attempting to delete brand with ID:', parseInt(id))
+    const { data, error } = await supabase
       .from('brands')
       .delete()
       .eq('id', parseInt(id))
+      .select()
+    
+    console.log('Supabase delete response:', { data, error })
     
     if (error) {
       console.error('Supabase error:', error)
       return res.status(500).json({ error: 'Failed to delete brand', details: error.message })
     }
     
+    console.log('Brand deleted successfully')
     return res.status(200).json({ success: true })
   } catch (error) {
     console.error('Error deleting brand:', error)
