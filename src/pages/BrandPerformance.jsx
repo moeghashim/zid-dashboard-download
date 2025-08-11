@@ -15,7 +15,7 @@ import {
   Package, DollarSign, Percent, BarChart3, PieChart as PieChartIcon
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { useBrands } from '../contexts/BrandContext'
+import { useApi } from '../contexts/ApiContext'
 import { 
   months, 
   categoryColors, 
@@ -30,7 +30,7 @@ export default function BrandPerformance() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedTab, setSelectedTab] = useState('overview')
   const { isAdmin } = useAuth()
-  const { brands, isLoading, addBrand, updateBrand, deleteBrand } = useBrands()
+  const { brands, isLoading, addBrand, updateBrand, deleteBrand } = useApi()
 
   // Use shared calculation functions with brands from context
   const { monthlyTotals, brandPerformances } = calculateAggregatedData(brands)
