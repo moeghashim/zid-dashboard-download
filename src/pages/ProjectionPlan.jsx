@@ -255,42 +255,6 @@ export default function ProjectionPlan() {
         </CardContent>
       </Card>
 
-      {/* September 2026 Projection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>September 2026 Projection Scenarios</CardTitle>
-          <CardDescription>Multiple forecasting methods and scenario analysis</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="p-4 border rounded-lg text-center">
-              <div className="text-sm font-medium text-red-600 mb-1">Conservative</div>
-              <div className="text-2xl font-bold">{formatCurrency(919146)}</div>
-              <div className="text-xs text-muted-foreground">15% below realistic</div>
-            </div>
-            <div className="p-4 border-2 border-primary rounded-lg text-center bg-primary/5">
-              <div className="text-sm font-medium text-primary mb-1">Realistic</div>
-              <div className="text-2xl font-bold">{formatCurrency(1081348)}</div>
-              <div className="text-xs text-muted-foreground">Weighted average</div>
-            </div>
-            <div className="p-4 border rounded-lg text-center">
-              <div className="text-sm font-medium text-green-600 mb-1">Optimistic</div>
-              <div className="text-2xl font-bold">{formatCurrency(1297618)}</div>
-              <div className="text-xs text-muted-foreground">20% above realistic</div>
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <h4 className="font-medium">Methodology</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              The September 2026 projection uses multiple forecasting methods including linear trend analysis, 
-              seasonal pattern recognition, moving average calculation, and polynomial regression modeling. 
-              The realistic scenario of <strong>{formatCurrency(1081348)}</strong> represents the weighted 
-              average of all methods and is considered the most likely outcome.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Key Insights */}
       <Card>
@@ -383,11 +347,6 @@ export default function ProjectionPlan() {
         </CardContent>
       </Card>
 
-      {/* Footer */}
-      <div className="text-center text-sm text-muted-foreground border-t pt-6">
-        <p>Report prepared by Manus AI Agent • Interactive Dashboard Available</p>
-        <p className="mt-1">Contact available for follow-up analysis and updates</p>
-      </div>
     </div>
   )
 }
