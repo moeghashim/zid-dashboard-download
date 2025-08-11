@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge.jsx'
 import { 
   TrendingUp, TrendingDown, DollarSign, Calendar, Target, 
-  AlertTriangle, FileText, Download, BarChart3 
+  AlertTriangle, FileText, Download, BarChart3, Percent 
 } from 'lucide-react'
 import { useApi } from '../contexts/ApiContext'
 import { 
