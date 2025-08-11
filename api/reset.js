@@ -12,12 +12,18 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const DEFAULT_BRANDS = [
-  { name: 'Crush', category: 'Premium Food', starting_sales: 60000.00, monthly_growth_rate: 15.50, starting_month: 0 },
-  { name: 'Milaf', category: 'Traditional Goods', starting_sales: 10000.00, monthly_growth_rate: 8.20, starting_month: 0 },
-  { name: 'Bab Sharqi', category: 'Traditional Goods', starting_sales: 10000.00, monthly_growth_rate: 3.10, starting_month: 0 },
-  { name: 'Nuricle', category: 'Health & Beauty', starting_sales: 10000.00, monthly_growth_rate: 6.80, starting_month: 0 },
-  { name: 'Reeq Al Nahl', category: 'Premium Food', starting_sales: 5000.00, monthly_growth_rate: 12.30, starting_month: 0 },
-  { name: 'Leen Dates', category: 'Premium Food', starting_sales: 20000.00, monthly_growth_rate: 5.50, starting_month: 0 }
+  { name: 'Crush', category: 'Premium Food', starting_sales: 60000.00, monthly_growth_rate: 15.50, starting_month: 0, has_launch_plan: true, launch_plan_fee: 10000 },
+  { name: 'Milaf', category: 'Traditional Goods', starting_sales: 10000.00, monthly_growth_rate: 8.20, starting_month: 0, has_launch_plan: false, launch_plan_fee: 0 },
+  { name: 'Bab Sharqi', category: 'Traditional Goods', starting_sales: 10000.00, monthly_growth_rate: 3.10, starting_month: 0, has_launch_plan: true, launch_plan_fee: 10000 },
+  { name: 'Nuricle', category: 'Health & Beauty', starting_sales: 10000.00, monthly_growth_rate: 6.80, starting_month: 0, has_launch_plan: false, launch_plan_fee: 0 },
+  { name: 'Reeq Al Nahl', category: 'Premium Food', starting_sales: 5000.00, monthly_growth_rate: 12.30, starting_month: 0, has_launch_plan: true, launch_plan_fee: 10000 },
+  { name: 'Leen Dates', category: 'Premium Food', starting_sales: 20000.00, monthly_growth_rate: 5.50, starting_month: 0, has_launch_plan: false, launch_plan_fee: 0 },
+  { name: 'Salam Coffee', category: 'Premium Food', starting_sales: 35000.00, monthly_growth_rate: 9.80, starting_month: 1, has_launch_plan: true, launch_plan_fee: 10000 },
+  { name: 'Golden Spice', category: 'Traditional Goods', starting_sales: 8000.00, monthly_growth_rate: 7.50, starting_month: 2, has_launch_plan: false, launch_plan_fee: 0 },
+  { name: 'Desert Rose Beauty', category: 'Health & Beauty', starting_sales: 15000.00, monthly_growth_rate: 11.20, starting_month: 1, has_launch_plan: true, launch_plan_fee: 10000 },
+  { name: 'Heritage Crafts', category: 'Traditional Goods', starting_sales: 12000.00, monthly_growth_rate: 6.40, starting_month: 3, has_launch_plan: false, launch_plan_fee: 0 },
+  { name: 'Pure Honey Co', category: 'Premium Food', starting_sales: 25000.00, monthly_growth_rate: 8.90, starting_month: 2, has_launch_plan: true, launch_plan_fee: 10000 },
+  { name: 'Arabian Elegance', category: 'Fashion', starting_sales: 18000.00, monthly_growth_rate: 10.50, starting_month: 1, has_launch_plan: true, launch_plan_fee: 10000 }
 ]
 
 const corsHeaders = {
