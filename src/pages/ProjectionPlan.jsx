@@ -82,8 +82,8 @@ export default function ProjectionPlan() {
               <div className="text-sm text-muted-foreground">Average Monthly Revenue</div>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-primary">{keyMetrics.peakMonth || 'N/A'}</div>
-              <div className="text-sm text-muted-foreground">Peak Month</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(keyMetrics.twelfthMonthCommission || 0)}</div>
+              <div className="text-sm text-muted-foreground">12th Mo Commission</div>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
               <div className="text-2xl font-bold text-primary">{keyMetrics.brandsWithLaunchPlans || 0}</div>

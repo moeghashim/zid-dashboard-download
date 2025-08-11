@@ -152,6 +152,10 @@ export function calculateKeyMetrics(brands) {
   const peakMonthIndex = revenues.indexOf(maxRevenue)
   const peakMonth = monthlyTotals[peakMonthIndex]?.month || 'N/A'
   
+  // Calculate 12th month commission (final month - September 2026)
+  const finalMonthRevenue = revenues[11] || 0  // September 2026 is index 11
+  const defaultCommissionRate = 5 // Default Zid commission rate is 5%
+  const twelfthMonthCommission = finalMonthRevenue * (defaultCommissionRate / 100)
   
   return {
     totalRevenue,
@@ -163,6 +167,8 @@ export function calculateKeyMetrics(brands) {
     peakMonthRevenue: maxRevenue,
     peakMonth,
     peakRevenue: maxRevenue, // For backward compatibility
+    twelfthMonthCommission, // New field for 12th month commission
+    finalMonthRevenue, // Revenue in final month for reference
     brandsWithLaunchPlans: launchPlanMetrics.brandsWithLaunchPlans
   }
 }
