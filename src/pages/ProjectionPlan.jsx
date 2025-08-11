@@ -411,6 +411,39 @@ export default function ProjectionPlan() {
         </CardContent>
       </Card>
 
+      {/* Strategic Recommendations */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Strategic Recommendations</CardTitle>
+          <CardDescription>Actionable insights for business planning</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-medium mb-3">Short-term (Next 3 months)</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>• <strong>Marketing:</strong> Position Zid Global as the most cost-effective gateway to international markets, emphasizing logistics and marketing advantages.</li>
+                <li>• Develop a targeted acquisition list for Christmas and Ramadan.</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-3">Medium-term (6–12 months)</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>• Build a robust pipeline of merchants seeking global expansion.</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-3">Long-term (12+ months)</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>• Conduct a Gulf tour to acquire prominent regional brands.</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   )
 }
