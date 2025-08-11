@@ -150,48 +150,106 @@ export default function ProjectionPlan() {
         </CardContent>
       </Card>
 
-      {/* Quarterly Performance */}
+      {/* Responsibilities */}
       <Card>
         <CardHeader>
-          <CardTitle>Quarterly Performance Analysis</CardTitle>
-          <CardDescription>Quarter-over-quarter revenue analysis and growth trends</CardDescription>
+          <CardTitle>Responsibilities</CardTitle>
+          <CardDescription>Partnership responsibilities between Zid and Babanuj for market expansion</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {quarterlyData.map((quarter) => (
-              <div key={quarter.quarter} className="p-4 border rounded-lg">
-                <div className="text-sm font-medium text-muted-foreground">{quarter.quarter}</div>
-                <div className="text-2xl font-bold mt-1">{formatCurrency(quarter.revenue)}</div>
-                {quarter.growth !== null && (
-                  <div className={`flex items-center gap-1 mt-2 text-sm ${
-                    quarter.growth > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {quarter.growth > 0 ? (
-                      <TrendingUp className="h-3 w-3" />
-                    ) : (
-                      <TrendingDown className="h-3 w-3" />
-                    )}
-                    {quarter.growth > 0 ? '+' : ''}{quarter.growth.toFixed(1)}% QoQ
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Zid Responsibilities */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-primary">Zid Responsibilities</h3>
+              <div className="space-y-3">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">1</div>
+                    <p className="text-sm text-blue-800">
+                      Organize two merchant acquisition events on September 26 and December 26.
+                    </p>
                   </div>
-                )}
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">2</div>
+                    <p className="text-sm text-blue-800">
+                      Establish a partnership with the Ministry of Investment to support Saudi exports to the USA.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">3</div>
+                    <p className="text-sm text-blue-800">
+                      Strengthen relationships with shipping partners to reduce international shipping costs.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">4</div>
+                    <p className="text-sm text-blue-800">
+                      Collaborate with Babanuj to support the quarterly mega purchase event in the USA.
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          
-          <div className="space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h4 className="font-medium text-green-800 mb-2">Q1 2026: Exceptional Growth</h4>
-              <p className="text-sm text-green-700">
-                Q1 2026 shows exceptional growth with 200% quarter-over-quarter increase, 
-                indicating successful scaling strategies and market penetration.
-              </p>
             </div>
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-800 mb-2">Q3 2026: Strong Recovery</h4>
-              <p className="text-sm text-blue-700">
-                Q3 2026 demonstrates strong recovery with 11.4% growth, achieving the highest 
-                quarterly revenue of $3.04M and showing business resilience.
-              </p>
+
+            {/* Babanuj Responsibilities */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-primary">Babanuj Responsibilities</h3>
+              <div className="space-y-3">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">1</div>
+                    <p className="text-sm text-green-800">
+                      Onboard new merchants, including listing their products on Amazon and TikTok Shop in the USA.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">2</div>
+                    <p className="text-sm text-green-800">
+                      Assist merchants in obtaining all required documents and approvals to sell in the USA.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">3</div>
+                    <p className="text-sm text-green-800">
+                      Operate as the merchant's seller in the USA.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">4</div>
+                    <p className="text-sm text-green-800">
+                      Manage all import, storage, and logistics operations in the USA.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">5</div>
+                    <p className="text-sm text-green-800">
+                      Develop and execute a US marketing and launch plan by fostering relationships with affiliates to promote the products.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-green-600 text-white text-sm flex items-center justify-center font-semibold mt-0.5">6</div>
+                    <p className="text-sm text-green-800">
+                      Remit payment to merchants for all sold merchandise.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
