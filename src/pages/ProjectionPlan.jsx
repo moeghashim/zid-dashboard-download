@@ -8,6 +8,7 @@ import { useApi } from '../contexts/ApiContext'
 import { 
   convertToProjectionData, 
   calculateQuarterlyData, 
+  calculateKeyMetrics,
   formatCurrency 
 } from '../utils/revenueCalculations'
 
@@ -26,11 +27,12 @@ export default function ProjectionPlan() {
   }
 
   // Calculate dynamic data from brands context
-  let monthlyData, quarterlyData
+  let monthlyData, quarterlyData, keyMetrics
   
   try {
     monthlyData = convertToProjectionData(brands) || []
     quarterlyData = calculateQuarterlyData(brands) || []
+    keyMetrics = calculateKeyMetrics(brands) || {}
   } catch (error) {
     console.error('Error calculating projection data:', error)
     return (
@@ -72,24 +74,24 @@ export default function ProjectionPlan() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-primary">{formatCurrency(9441348)}</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(keyMetrics.totalRevenue || 0)}</div>
               <div className="text-sm text-muted-foreground">Total 12-Month Revenue</div>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-primary">{formatCurrency(786779)}</div>
+              <div className="text-2xl font-bold text-primary">{formatCurrency(keyMetrics.avgMonthlyRevenue || 0)}</div>
               <div className="text-sm text-muted-foreground">Average Monthly Revenue</div>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-primary">Aug 2026</div>
+              <div className="text-2xl font-bold text-primary">{keyMetrics.peakMonth || 'N/A'}</div>
               <div className="text-sm text-muted-foreground">Peak Month</div>
             </div>
             <div className="text-center p-4 bg-muted rounded-lg">
-              <div className="text-2xl font-bold text-primary">46%</div>
-              <div className="text-sm text-muted-foreground">Revenue Volatility</div>
+              <div className="text-2xl font-bold text-primary">{keyMetrics.brandsWithLaunchPlans || 0}</div>
+              <div className="text-sm text-muted-foreground">Brands with Launch Plans</div>
             </div>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Zid Global is projected to generate <strong>{formatCurrency(9441348)}</strong> in total revenue 
+            Zid Global is projected to generate <strong>{formatCurrency(keyMetrics.totalRevenue || 0)}</strong> in total revenue 
             over the 12-month period from October 2025 to September 2026. The business shows strong growth 
             potential with peak performance in Q1 2026, demonstrating exceptional 200% quarter-over-quarter growth.
           </p>

@@ -108,7 +108,7 @@ export const CloudBrandProvider = ({ children }) => {
     try {
       setError(null)
       
-      const response = await fetch(`${apiBaseUrl}/api/brands/${brandId}`, {
+      const response = await fetch(`${apiBaseUrl}/api/brands?id=${brandId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export const CloudBrandProvider = ({ children }) => {
     try {
       setError(null)
       
-      const response = await fetch(`${apiBaseUrl}/api/brands/${brandId}`, {
+      const response = await fetch(`${apiBaseUrl}/api/brands?id=${brandId}`, {
         method: 'DELETE'
       })
       
@@ -176,7 +176,7 @@ export const CloudBrandProvider = ({ children }) => {
     try {
       setError(null)
       
-      const response = await fetch(`${apiBaseUrl}/api/brands/reset`, {
+      const response = await fetch(`${apiBaseUrl}/api/reset`, {
         method: 'POST'
       })
       
