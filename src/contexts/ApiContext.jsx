@@ -136,18 +136,11 @@ export const ApiProvider = ({ children }) => {
     try {
       setError(null)
       
-      console.log('Deleting brand with ID:', brandId)
-      console.log('API URL:', `${apiBaseUrl}/api/brands?id=${brandId}`)
-      
       const response = await fetch(`${apiBaseUrl}/api/brands?id=${brandId}`, {
         method: 'DELETE'
       })
       
-      console.log('Delete response status:', response.status)
-      console.log('Delete response headers:', Object.fromEntries(response.headers.entries()))
-      
       const data = await response.json()
-      console.log('Delete response data:', data)
       
       if (data.success) {
         setBrands(prev => prev.filter(brand => brand.id !== brandId))
