@@ -358,38 +358,53 @@ export default function ProjectionPlan() {
         </CardContent>
       </Card>
 
-      {/* Strategic Recommendations */}
+      {/* Key Business Insights */}
       <Card>
         <CardHeader>
-          <CardTitle>Strategic Recommendations</CardTitle>
-          <CardDescription>Actionable insights for business planning</CardDescription>
+          <CardTitle>Key Business Insights</CardTitle>
+          <CardDescription>Strategic findings and market analysis</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            <div>
-              <h4 className="font-medium mb-3">Short-term (Next 3 months)</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Implement robust cash flow management to handle revenue volatility</li>
-                <li>• Monitor monthly performance closely with early warning systems</li>
-                <li>• Investigate factors behind Q1 2026 success for replication</li>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-medium text-green-600 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Growth Opportunities
+              </h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Strategic offline partnerships in The US</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Launching products across all available platforms: TikTok Shop, Amazon, Temu, Etsy..etc</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Logistics inside The US</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Benefit from Christmas Ramadan season</span>
+                </li>
               </ul>
             </div>
             
-            <div>
-              <h4 className="font-medium mb-3">Medium-term (6-12 months)</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Develop strategies to reduce revenue volatility and create stability</li>
-                <li>• Diversify revenue streams to minimize seasonal impact</li>
-                <li>• Scale operations appropriately for projected Q3 2026 growth</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-medium mb-3">Long-term (12+ months)</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Build sustainable growth model with predictable revenue generation</li>
-                <li>• Establish market leadership position in key segments</li>
-                <li>• Create financial resilience through multiple revenue channels</li>
+            <div className="space-y-4">
+              <h4 className="font-medium text-red-600 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Risk Factors
+              </h4>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Slow acquisition</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Future tariffs increase</span>
+                </li>
               </ul>
             </div>
           </div>
