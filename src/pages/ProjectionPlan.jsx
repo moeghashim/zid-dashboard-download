@@ -256,54 +256,103 @@ export default function ProjectionPlan() {
       </Card>
 
 
-      {/* Key Insights */}
+      {/* Business Model */}
       <Card>
         <CardHeader>
-          <CardTitle>Key Business Insights</CardTitle>
-          <CardDescription>Strategic findings and recommendations</CardDescription>
+          <CardTitle>Business Model</CardTitle>
+          <CardDescription>Revenue structure and partnership model between Zid and Babanuj</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-medium text-green-600 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Growth Opportunities
-              </h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Strong Q1 2026 performance with 200% QoQ growth indicates successful scaling strategies</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Peak performance months (Aug 2026: $1.26M) show maximum revenue potential</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Recovery pattern in Q3 2026 demonstrates business resilience and adaptability</span>
-                </li>
-              </ul>
+          <div className="space-y-6">
+            {/* Launch Package */}
+            <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-blue-900">Launch Package</h3>
+                  <p className="text-blue-700 text-sm">Complete merchant onboarding and marketing setup</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">Package Fee:</span>
+                    <span className="text-2xl font-bold text-blue-900">$10,000</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">Zid Commission:</span>
+                    <span className="text-xl font-bold text-blue-900">30%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">Babanuj Receives:</span>
+                    <span className="text-xl font-bold text-blue-900">$7,000</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="font-medium text-blue-900 text-sm">Package Includes:</h4>
+                  <ul className="text-xs text-blue-700 space-y-1">
+                    <li>• Amazon marketplace setup and optimization</li>
+                    <li>• TikTok Shop integration and listing</li>
+                    <li>• Offline marketing materials and campaigns</li>
+                    <li>• Product photography and content creation</li>
+                    <li>• Initial advertising and promotion budget</li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-medium text-red-600 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Risk Factors
-              </h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>High revenue volatility (46%) requires careful cash flow management</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Significant month-over-month fluctuations need monitoring and mitigation</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Seasonal patterns (May-Jun decline) require strategic planning</span>
-                </li>
-              </ul>
+
+            {/* Ongoing Commission Structure */}
+            <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                  <Percent className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-green-900">Ongoing Sales Commission</h3>
+                  <p className="text-green-700 text-sm">Revenue sharing on all merchant sales</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-white rounded-lg border border-green-200">
+                  <div className="text-3xl font-bold text-green-900 mb-1">5%</div>
+                  <div className="text-sm font-medium text-green-800">Zid Commission</div>
+                  <div className="text-xs text-green-600 mt-1">On all sales revenue</div>
+                </div>
+                <div className="text-center p-4 bg-white rounded-lg border border-green-200">
+                  <div className="text-3xl font-bold text-green-900 mb-1">95%</div>
+                  <div className="text-sm font-medium text-green-800">Merchant Receives</div>
+                  <div className="text-xs text-green-600 mt-1">After Zid commission</div>
+                </div>
+                <div className="text-center p-4 bg-white rounded-lg border border-green-200">
+                  <div className="text-sm font-bold text-green-900 mb-1">Monthly</div>
+                  <div className="text-sm font-medium text-green-800">Payment Cycle</div>
+                  <div className="text-xs text-green-600 mt-1">Automated remittance</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Model Benefits */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-900 mb-3">For Merchants</h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Complete US market access setup</li>
+                  <li>• Professional marketing and launch support</li>
+                  <li>• No upfront marketing costs beyond package</li>
+                  <li>• 95% of ongoing sales revenue retained</li>
+                </ul>
+              </div>
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <h4 className="font-semibold text-green-900 mb-3">For Zid</h4>
+                <ul className="text-sm text-green-800 space-y-1">
+                  <li>• $3,000 upfront revenue per merchant</li>
+                  <li>• 5% recurring commission on all sales</li>
+                  <li>• Scalable revenue model</li>
+                  <li>• Long-term merchant relationships</li>
+                </ul>
+              </div>
             </div>
           </div>
         </CardContent>
