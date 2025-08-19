@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import { 
   TrendingUp, TrendingDown, DollarSign, Calendar, Target, 
-  BarChart3, PieChart as PieChartIcon, Activity, Percent 
+  BarChart3, PieChart as PieChartIcon, Activity, Percent, Trash2 
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useApi } from '../contexts/ApiContext'
@@ -69,14 +69,10 @@ export default function Dashboard() {
       )
     : { revenue: 0 }
   
-  const peakCommission = (peakCommissionMonth.revenue * commissionRate) / 100
-
   const commissionData = projectionData.map(month => ({
     ...month,
     commission: (month.revenue * commissionRate) / 100
   }))
-
-  const formatPercentage = (value) => `${(value || 0).toFixed(1)}%`
 
   return (
     <div className="space-y-8">
@@ -141,7 +137,7 @@ export default function Dashboard() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
@@ -162,6 +158,12 @@ export default function Dashboard() {
             <Percent className="h-4 w-4" />
             Zid Commission
           </TabsTrigger>
+          {isAdmin() && (
+            <TabsTrigger value="manage" className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Manage Brands
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Overview Tab */}
@@ -238,47 +240,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Key Insights */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Key Insights</CardTitle>
-              <CardDescription>Important findings from the projection analysis</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-green-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold">Strong Q1 2026 Performance</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Q1 2026 shows exceptional growth with {quarterlyData[1]?.growth}% quarter-over-quarter increase
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <Target className="h-5 w-5 text-blue-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold">12th Month Commission</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Zid earns {formatCurrency(keyMetrics.twelfthMonthCommission || 0)} commission in Sep 2026 (final month)
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-green-500 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold">Recovery Pattern</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Strong recovery trend observed in Q3 2026 after mid-year decline
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Monthly Trends Tab */}
@@ -680,7 +641,201 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Brand Management Tab */}
+        {isAdmin() && (
+          <TabsContent value="manage" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Brand Management</CardTitle>
+                <CardDescription>
+                  Delete specific brands from the system. This action cannot be undone.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BrandManagementSection />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
+    </div>
+  )
+}
+
+// Brand Management Component
+function BrandManagementSection() {
+  const { brands, deleteBrand, isLoading } = useApi()
+  const [deleteStatus, setDeleteStatus] = useState({})
+  const [isDeleting, setIsDeleting] = useState(false)
+  
+  const targetBrandNames = ["Tech Innovators", "Fashion Forward", "Health & Wellness"]
+  
+  const targetBrands = brands.filter(brand => 
+    targetBrandNames.includes(brand.name)
+  )
+  
+  const handleDeleteBrand = async (brand) => {
+    if (!confirm(`Are you sure you want to delete "${brand.name}"? This action cannot be undone.`)) {
+      return
+    }
+    
+    setIsDeleting(true)
+    setDeleteStatus(prev => ({ ...prev, [brand.id]: 'deleting' }))
+    
+    try {
+      await deleteBrand(brand.id)
+      setDeleteStatus(prev => ({ ...prev, [brand.id]: 'success' }))
+      
+      // Clear success status after 3 seconds
+      setTimeout(() => {
+        setDeleteStatus(prev => {
+          const newStatus = { ...prev }
+          delete newStatus[brand.id]
+          return newStatus
+        })
+      }, 3000)
+    } catch (error) {
+      console.error('Failed to delete brand:', error)
+      setDeleteStatus(prev => ({ ...prev, [brand.id]: 'error' }))
+      
+      // Clear error status after 5 seconds
+      setTimeout(() => {
+        setDeleteStatus(prev => {
+          const newStatus = { ...prev }
+          delete newStatus[brand.id]
+          return newStatus
+        })
+      }, 5000)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+  
+  const handleDeleteAll = async () => {
+    if (!confirm(`Are you sure you want to delete all ${targetBrands.length} brands: ${targetBrands.map(b => b.name).join(', ')}? This action cannot be undone.`)) {
+      return
+    }
+    
+    setIsDeleting(true)
+    
+    for (const brand of targetBrands) {
+      setDeleteStatus(prev => ({ ...prev, [brand.id]: 'deleting' }))
+      
+      try {
+        await deleteBrand(brand.id)
+        setDeleteStatus(prev => ({ ...prev, [brand.id]: 'success' }))
+      } catch (error) {
+        console.error('Failed to delete brand:', brand.name, error)
+        setDeleteStatus(prev => ({ ...prev, [brand.id]: 'error' }))
+      }
+    }
+    
+    setIsDeleting(false)
+    
+    // Clear all statuses after 3 seconds
+    setTimeout(() => {
+      setDeleteStatus({})
+    }, 3000)
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-3 text-muted-foreground">Loading brands...</span>
+      </div>
+    )
+  }
+  
+  if (targetBrands.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-green-600 font-semibold text-lg mb-2">✅ All target brands have been deleted!</div>
+        <p className="text-muted-foreground">
+          The brands "Tech Innovators", "Fashion Forward", and "Health & Wellness" are no longer in the system.
+        </p>
+      </div>
+    )
+  }
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Target Brands for Deletion</h3>
+          <p className="text-sm text-muted-foreground">
+            Found {targetBrands.length} brands to delete: {targetBrands.map(b => b.name).join(', ')}
+          </p>
+        </div>
+        {targetBrands.length > 1 && (
+          <button
+            onClick={handleDeleteAll}
+            disabled={isDeleting}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete All {targetBrands.length} Brands
+          </button>
+        )}
+      </div>
+      
+      <div className="grid gap-4">
+        {targetBrands.map((brand) => {
+          const status = deleteStatus[brand.id]
+          
+          return (
+            <Card key={brand.id} className="border-2 border-red-200">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-lg">{brand.name}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Category: {brand.category} | Starting Sales: {formatCurrency(brand.startingSales)} | Growth: {brand.monthlyGrowthRate}%
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    {status === 'success' && (
+                      <div className="text-green-600 font-semibold flex items-center gap-1">
+                        ✅ Deleted Successfully
+                      </div>
+                    )}
+                    
+                    {status === 'error' && (
+                      <div className="text-red-600 font-semibold flex items-center gap-1">
+                        ❌ Delete Failed
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={() => handleDeleteBrand(brand)}
+                      disabled={isDeleting || status === 'deleting' || status === 'success'}
+                      className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {status === 'deleting' ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Deleting...
+                        </>
+                      ) : status === 'success' ? (
+                        <>
+                          ✅ Deleted
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4" />
+                          Delete Brand
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
     </div>
   )
 }
