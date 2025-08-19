@@ -63,11 +63,11 @@ export default function Dashboard() {
   const totalCommission = recurringCommission + launchPlanCommission
   const avgMonthlyCommission = recurringCommission / 12
   
-  const peakCommissionMonth = projectionData.length > 0 
-    ? projectionData.reduce((max, month) => 
-        month.revenue > max.revenue ? month : max
-      )
-    : { revenue: 0 }
+  // const peakCommissionMonth = projectionData.length > 0 
+  //   ? projectionData.reduce((max, month) => 
+  //       month.revenue > max.revenue ? month : max
+  //     )
+  //   : { revenue: 0 }
   
   const commissionData = projectionData.map(month => ({
     ...month,

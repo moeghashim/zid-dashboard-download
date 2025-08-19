@@ -1,0 +1,91 @@
+{
+  "name": "zid-dashboard-download",
+  "version": "1.0.0",
+  "description": "Zid Global Dashboard - Revenue projection and brand management system",
+  "type": "project",
+  "main": "src/main.jsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "vite": "^6.3.5",
+    "@supabase/supabase-js": "latest",
+    "recharts": "latest",
+    "lucide-react": "latest"
+  },
+  "environment": {
+    "node": ">=18.0.0",
+    "package_manager": "pnpm"
+  },
+  "services": {
+    "database": {
+      "provider": "supabase",
+      "url": "https://oqvprhxtvyjosdxalnxw.supabase.co",
+      "tables": ["brands"]
+    },
+    "hosting": {
+      "provider": "vercel",
+      "domain": "zid-dashboard-download.vercel.app"
+    }
+  },
+  "features": [
+    "revenue-projections",
+    "brand-management", 
+    "launch-plans",
+    "dashboard-analytics",
+    "jwt-authentication",
+    "commission-tracking"
+  ],
+  "api": {
+    "endpoints": [
+      "/api/brands",
+      "/api/reset"
+    ],
+    "authentication": "supabase-jwt"
+  },
+  "security": {
+    "jwt_signing": "ES256",
+    "environment_variables": [
+      "SUPABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "SUPABASE_JWT_SECRET"
+    ]
+  },
+  "development": {
+    "port": 5173,
+    "hot_reload": true,
+    "api_proxy": true
+  },
+  "build": {
+    "output_dir": "dist",
+    "assets_dir": "assets",
+    "framework": "react"
+  },
+  "deployment": {
+    "platform": "vercel",
+    "functions": "serverless",
+    "regions": ["us-east-1"]
+  }
+  {
+    "mcpServers": {
+      "supabase": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@supabase/mcp-server-supabase@latest",
+          "--read-only",
+          "--project-ref=oqvprhxtvyjosdxalnxw"
+        ],
+        "env": {
+          "SUPABASE_ACCESS_TOKEN": "sbp_eb265eef9010d6de79207adf1bee11b64dfc5459"
+        }
+      }
+    }
+  }
+}

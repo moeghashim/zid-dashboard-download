@@ -7,7 +7,6 @@ import {
 import { useApi } from '../contexts/ApiContext'
 import { 
   convertToProjectionData, 
-  calculateQuarterlyData, 
   calculateKeyMetrics,
   formatCurrency 
 } from '../utils/revenueCalculations'
@@ -27,11 +26,10 @@ export default function ProjectionPlan() {
   }
 
   // Calculate dynamic data from brands context
-  let monthlyData, quarterlyData, keyMetrics
+  let monthlyData, keyMetrics
   
   try {
     monthlyData = convertToProjectionData(brands) || []
-    quarterlyData = calculateQuarterlyData(brands) || []
     keyMetrics = calculateKeyMetrics(brands) || {}
   } catch (error) {
     console.error('Error calculating projection data:', error)
@@ -116,7 +114,7 @@ export default function ProjectionPlan() {
                 </tr>
               </thead>
               <tbody>
-                {monthlyData.map((month, index) => (
+                {monthlyData.map((month) => (
                   <tr key={month.month} className="border-b hover:bg-muted/50">
                     <td className="p-2 flex items-center gap-2">
                       {month.month}

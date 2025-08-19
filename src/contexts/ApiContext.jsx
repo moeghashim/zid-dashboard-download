@@ -14,7 +14,7 @@ export const useApi = () => {
 // Get API base URL based on environment
 const getApiBaseUrl = () => {
   // In development, use local dev server API
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.MODE === 'development') {
     return ''  // Use relative URLs for Vite proxy
   }
   // In production, use current domain
@@ -265,7 +265,7 @@ export const ApiProvider = ({ children }) => {
           } else {
             reject(new Error('Invalid file format'))
           }
-        } catch (error) {
+        } catch {
           reject(new Error('Failed to parse JSON file'))
         }
       }

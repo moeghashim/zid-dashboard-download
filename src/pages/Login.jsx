@@ -34,7 +34,7 @@ export default function Login() {
       if (!result.success) {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred during login')
     } finally {
       setIsLoading(false)
