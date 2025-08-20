@@ -26,10 +26,23 @@ const DEFAULT_BRANDS = [
   { name: 'Arabian Elegance', category: 'Fashion', starting_sales: 18000.00, monthly_growth_rate: 10.50, starting_month: 1, has_launch_plan: true, launch_plan_fee: 10000 }
 ]
 
+const allowedOrigin = process.env.ALLOWED_ORIGIN || '*'
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': allowedOrigin,
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key',
+}
+
+// Optional admin API key enforcement for reset
+const adminApiKey = process.env.ADMIN_API_KEY
+function requireAdmin(req, res) {
+  if (!adminApiKey) return true
+  const provided = req.headers['x-api-key']
+  if (provided !== adminApiKey) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return false
+  }
+  return true
 }
 
 module.exports = async function handler(req, res) {
@@ -52,6 +65,9 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Admin gate
+    if (!requireAdmin(req, res)) return
+
     // Delete all existing brands
     const { error: deleteError } = await supabase
       .from('brands')

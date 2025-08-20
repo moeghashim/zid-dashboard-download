@@ -28,6 +28,10 @@ export const ApiProvider = ({ children }) => {
   const [error, setError] = useState(null)
 
   const apiBaseUrl = getApiBaseUrl()
+  const adminApiKey = import.meta.env.VITE_ADMIN_API_KEY
+  const withAdminHeaders = (headers = {}) => (
+    adminApiKey ? { ...headers, 'x-api-key': adminApiKey } : headers
+  )
 
   // Fetch brands from API
   const fetchBrands = async () => {
@@ -68,9 +72,7 @@ export const ApiProvider = ({ children }) => {
       
       const response = await fetch(`${apiBaseUrl}/api/brands`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: withAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(brandData)
       })
       
@@ -101,9 +103,7 @@ export const ApiProvider = ({ children }) => {
       
       const response = await fetch(`${apiBaseUrl}/api/brands?id=${brandId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: withAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(brandData)
       })
       
@@ -137,7 +137,8 @@ export const ApiProvider = ({ children }) => {
       setError(null)
       
       const response = await fetch(`${apiBaseUrl}/api/brands?id=${brandId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: withAdminHeaders(),
       })
       
       const data = await response.json()
@@ -166,7 +167,8 @@ export const ApiProvider = ({ children }) => {
       setError(null)
       
       const response = await fetch(`${apiBaseUrl}/api/reset`, {
-        method: 'POST'
+        method: 'POST',
+        headers: withAdminHeaders(),
       })
       
       const data = await response.json()

@@ -1,5 +1,6 @@
 // Vercel Serverless Function for brand data management with Supabase
 import { createClient } from '@supabase/supabase-js'
+import { BrandCreateSchema, BrandUpdateSchema, toDb, fromDb } from '../src/schemas/brand.js'
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -46,11 +47,24 @@ let defaultBrands = [
   }
 ]
 
-// CORS headers
+// CORS headers (allow configure via env)
+const allowedOrigin = process.env.ALLOWED_ORIGIN || '*'
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': allowedOrigin,
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key',
+}
+
+// Optional admin API key enforcement for mutations
+const adminApiKey = process.env.ADMIN_API_KEY
+function requireAdmin(req, res) {
+  if (!adminApiKey) return true // no key set -> allow (development)
+  const provided = req.headers['x-api-key']
+  if (provided !== adminApiKey) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return false
+  }
+  return true
 }
 
 export default async function handler(req, res) {
@@ -72,10 +86,13 @@ export default async function handler(req, res) {
       case 'GET':
         return await getBrands(req, res)
       case 'POST':
+        if (!requireAdmin(req, res)) return
         return await createBrand(req, res)
       case 'PUT':
+        if (!requireAdmin(req, res)) return
         return await updateBrand(req, res)
       case 'DELETE':
+        if (!requireAdmin(req, res)) return
         return await deleteBrand(req, res)
       default:
         res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE'])
@@ -107,16 +124,7 @@ async function getBrands(req, res) {
     }
     
     // Transform data to match frontend expectations
-    const transformedBrands = brands.map(brand => ({
-      id: brand.id,
-      name: brand.name,
-      category: brand.category,
-      startingSales: parseFloat(brand.starting_sales),
-      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
-      startingMonth: brand.starting_month,
-      hasLaunchPlan: brand.has_launch_plan || false,
-      launchPlanFee: parseFloat(brand.launch_plan_fee) || 0
-    }))
+    const transformedBrands = brands.map(fromDb)
     
     return res.status(200).json({ success: true, brands: transformedBrands })
   } catch (error) {
@@ -129,24 +137,18 @@ async function getBrands(req, res) {
 // Create new brand
 async function createBrand(req, res) {
   try {
-    const { name, category, startingSales, monthlyGrowthRate, startingMonth, hasLaunchPlan, launchPlanFee } = req.body
-    
-    // Validation
-    if (!name || !category || startingSales === undefined || monthlyGrowthRate === undefined) {
-      return res.status(400).json({ error: 'Missing or invalid required fields' })
+    // Validate request body
+    const parsed = BrandCreateSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Invalid request body', details: parsed.error.flatten() })
     }
+    const valid = parsed.data
 
     // Use default data if Supabase is not configured
     if (!supabase) {
       const newBrand = {
         id: Date.now(), // Simple ID generation for development
-        name: name.trim(),
-        category: category.trim(),
-        startingSales: parseFloat(startingSales),
-        monthlyGrowthRate: parseFloat(monthlyGrowthRate),
-        startingMonth: parseInt(startingMonth) || 0,
-        hasLaunchPlan: hasLaunchPlan || false,
-        launchPlanFee: parseFloat(launchPlanFee) || 0
+        ...valid,
       }
       
       // Add to in-memory array
@@ -158,17 +160,7 @@ async function createBrand(req, res) {
     
     const { data: brand, error } = await supabase
       .from('brands')
-      .insert([
-        {
-          name: name.trim(),
-          category: category.trim(),
-          starting_sales: parseFloat(startingSales),
-          monthly_growth_rate: parseFloat(monthlyGrowthRate),
-          starting_month: parseInt(startingMonth) || 0,
-          has_launch_plan: hasLaunchPlan || false,
-          launch_plan_fee: parseFloat(launchPlanFee) || 0
-        }
-      ])
+      .insert([ toDb(valid) ])
       .select()
       .single()
     
@@ -178,16 +170,7 @@ async function createBrand(req, res) {
     }
     
     // Transform data to match frontend expectations
-    const transformedBrand = {
-      id: brand.id,
-      name: brand.name,
-      category: brand.category,
-      startingSales: parseFloat(brand.starting_sales),
-      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
-      startingMonth: brand.starting_month,
-      hasLaunchPlan: brand.has_launch_plan || false,
-      launchPlanFee: parseFloat(brand.launch_plan_fee) || 0
-    }
+    const transformedBrand = fromDb(brand)
     
     return res.status(201).json({ success: true, brand: transformedBrand })
   } catch (error) {
@@ -200,7 +183,11 @@ async function createBrand(req, res) {
 async function updateBrand(req, res) {
   try {
     const { id } = req.query
-    const { name, category, startingSales, monthlyGrowthRate, startingMonth, hasLaunchPlan, launchPlanFee } = req.body
+    const parsed = BrandUpdateSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Invalid request body', details: parsed.error.flatten() })
+    }
+    const updates = parsed.data
     
     if (!id) {
       return res.status(400).json({ error: 'Brand ID required' })
@@ -214,16 +201,7 @@ async function updateBrand(req, res) {
       }
       
       const existingBrand = defaultBrands[brandIndex]
-      const updatedBrand = {
-        ...existingBrand,
-        name: name !== undefined ? name.trim() : existingBrand.name,
-        category: category !== undefined ? category.trim() : existingBrand.category,
-        startingSales: startingSales !== undefined ? parseFloat(startingSales) : existingBrand.startingSales,
-        monthlyGrowthRate: monthlyGrowthRate !== undefined ? parseFloat(monthlyGrowthRate) : existingBrand.monthlyGrowthRate,
-        startingMonth: startingMonth !== undefined ? parseInt(startingMonth) : existingBrand.startingMonth,
-        hasLaunchPlan: hasLaunchPlan !== undefined ? hasLaunchPlan : existingBrand.hasLaunchPlan,
-        launchPlanFee: launchPlanFee !== undefined ? parseFloat(launchPlanFee) : existingBrand.launchPlanFee
-      }
+      const updatedBrand = { ...existingBrand, ...updates }
       
       // Update in-memory array
       defaultBrands[brandIndex] = updatedBrand
@@ -233,13 +211,13 @@ async function updateBrand(req, res) {
     }
     
     const updateData = {}
-    if (name !== undefined) updateData.name = name.trim()
-    if (category !== undefined) updateData.category = category.trim()
-    if (startingSales !== undefined) updateData.starting_sales = parseFloat(startingSales)
-    if (monthlyGrowthRate !== undefined) updateData.monthly_growth_rate = parseFloat(monthlyGrowthRate)
-    if (startingMonth !== undefined) updateData.starting_month = parseInt(startingMonth)
-    if (hasLaunchPlan !== undefined) updateData.has_launch_plan = hasLaunchPlan
-    if (launchPlanFee !== undefined) updateData.launch_plan_fee = parseFloat(launchPlanFee)
+    if (updates.name !== undefined) updateData.name = updates.name.trim()
+    if (updates.category !== undefined) updateData.category = updates.category.trim()
+    if (updates.startingSales !== undefined) updateData.starting_sales = Number(updates.startingSales)
+    if (updates.monthlyGrowthRate !== undefined) updateData.monthly_growth_rate = Number(updates.monthlyGrowthRate)
+    if (updates.startingMonth !== undefined) updateData.starting_month = Number(updates.startingMonth)
+    if (updates.hasLaunchPlan !== undefined) updateData.has_launch_plan = Boolean(updates.hasLaunchPlan)
+    if (updates.launchPlanFee !== undefined) updateData.launch_plan_fee = Number(updates.launchPlanFee)
     
     const { data: brand, error } = await supabase
       .from('brands')
@@ -257,16 +235,7 @@ async function updateBrand(req, res) {
     }
     
     // Transform data to match frontend expectations
-    const transformedBrand = {
-      id: brand.id,
-      name: brand.name,
-      category: brand.category,
-      startingSales: parseFloat(brand.starting_sales),
-      monthlyGrowthRate: parseFloat(brand.monthly_growth_rate),
-      startingMonth: brand.starting_month,
-      hasLaunchPlan: brand.has_launch_plan || false,
-      launchPlanFee: parseFloat(brand.launch_plan_fee) || 0
-    }
+    const transformedBrand = fromDb(brand)
     
     return res.status(200).json({ success: true, brand: transformedBrand })
   } catch (error) {
